@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter2laravel8/constant.dart';
+import 'package:flutter2laravel8/models/product.dart';
 
 import 'dart:convert' show json;
 import 'package:http/http.dart' as http;
@@ -13,6 +16,8 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
+  List<Product?> _products = [];
+
   @override
   void initState() {
     _fetchProducts();
@@ -40,8 +45,12 @@ class _ProductPageState extends State<ProductPage> {
       final response = await http.get(Uri.parse(url), headers: headers);
       // print(response.body);
       if (response.statusCode == 200) {
-        var parsed = json.decode(response.body);
-        print(parsed);
+        List parsed = json.decode(response.body);
+        // print(parsed);
+        setState(() {
+          _products = parsed.map((json) => new Product.fromJson(json)).toList();
+        });
+        inspect(_products);
       } else {
         print('Could not load data. @ product.page._fetchProducts()');
         throw Exception('ไม่สามารถโหลดข้อมูลจาก API ได้ (Error Code:' +
