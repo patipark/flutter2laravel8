@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
       // print(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
         var parsed = json.decode(response.body);
-        // print(parsed);
+        print(parsed);
         // var user = User.fromJson(parsed['user']);
         setState(() {
           _user = User.fromJson(parsed['user']);

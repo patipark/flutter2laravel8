@@ -46,7 +46,7 @@ class _ProductPageState extends State<ProductPage> {
       // print(response.body);
       if (response.statusCode == 200) {
         List parsed = json.decode(response.body);
-        // print(parsed);
+        print(parsed);
         setState(() {
           _products = parsed.map((json) => new Product.fromJson(json)).toList();
         });
