@@ -16,9 +16,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // final _formKeys = GlobalKey<FormBuilderState>();
   final _formKeys = GlobalKey<FormBuilderState>();
-  final textControllers = TextEditingController();
   User? _user;
   bool _isLoad = false;
 
@@ -93,7 +91,8 @@ class _LoginPageState extends State<LoginPage> {
         showDialogBox('Login successed!', 'เข้าสู่ระบบสำเร็จ!');
       } else {
         print('Could not post data. @ login.page._login()');
-        showDialogBox('Login failed!', 'ไม่สามารถเข้าสู่ระบบได้');
+        showDialogBox(
+            'Login failed!', 'ไม่สามารถเข้าสู่ระบบได้\n${response.body}');
       }
     } catch (e) {
       print('error on login.page._login() => $e');
@@ -287,10 +286,10 @@ class _LoginPageState extends State<LoginPage> {
                       padding: EdgeInsets.all(10),
                       child: FormBuilder(
                         key: _formKeys,
-                        initialValue: {
-                          'email': '',
-                          'password': '',
-                        },
+                        // initialValue: {
+                        //   'email': '',
+                        //   'password': '',
+                        // },
                         // autovalidateMode: AutovalidateMode.onUserInteraction,
                         child: Column(
                           children: <Widget>[

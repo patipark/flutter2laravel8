@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter2laravel8/constant.dart';
 import 'package:flutter2laravel8/models/product.dart';
@@ -64,6 +66,7 @@ class _ProductPageState extends State<ProductPage> {
         itemCount: products.length,
         itemBuilder: (BuildContext context, int index) {
           Product product = products[index];
+          inspect(product);
           return ListTile(
             leading: Icon(Icons.album),
             title: Text(
@@ -174,7 +177,7 @@ class _ProductPageState extends State<ProductPage> {
                         print(
                             'snapshot.connectionState=${snapshot.connectionState}');
                         print('snapshot.hasData ==> ${snapshot.hasData}');
-                        // print('snapshot.data ==> ${snapshot.data}');
+                        print('snapshot.data ==> ${snapshot.data}');
                         if (snapshot.hasData) {
                           // List<Customer> customer = customerFromJson(
                           //     convert.jsonEncode(snapshot.data['data']));
