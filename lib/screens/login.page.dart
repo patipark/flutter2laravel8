@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter2laravel8/models/user.dart';
-import 'package:flutter2laravel8/screens/product.page.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'dart:convert' show json;
 import 'package:http/http.dart' as http;
@@ -21,16 +20,39 @@ class _LoginPageState extends State<LoginPage> {
   final _formKeys = GlobalKey<FormBuilderState>();
   final textControllers = TextEditingController();
   User? _user;
-  bool isLoad = true;
+  bool _isLoad = false;
 
   @override
   void initState() {
-    // _login();
+    _initData();
     super.initState();
+  }
+
+  _initData() async {
+    var user = await getUserFromPref();
+    setState(() {
+      _user = user;
+    });
+  }
+
+  Future<User?> getUserFromPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var loginData = prefs.getString('loginData');
+    if (loginData != null && loginData.isNotEmpty) {
+      var mapData = json.decode(loginData);
+      if (mapData != null && mapData.containsKey('user')) {
+        var user = User.fromJson(mapData['user']);
+        return user;
+      }
+    }
+    return null;
   }
 
   void _login(Map<String, dynamic> formData) async {
     try {
+      setState(() {
+        _isLoad = true;
+      });
       String url = BASE_API_URL + '/login';
       print(url);
       var headers = {
@@ -41,17 +63,21 @@ class _LoginPageState extends State<LoginPage> {
       var body = json.encode(formData);
       final response =
           await http.post(Uri.parse(url), headers: headers, body: body);
-      // print(response.body);
+      print(response.body);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        var parsed = json.decode(response.body);
-        print(parsed);
-        // var user = User.fromJson(parsed['user']);
-        setState(() {
-          _user = User.fromJson(parsed['user']);
-        });
-        inspect(_user);
+        // var parsed = json.decode(response.body);
+        // print(parsed);
+        // // var user = User.fromJson(parsed['user']);
+        // setState(() {
+        //   _user = User.fromJson(parsed['user']);
+        // });
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('loginData', response.body);
+        var user = await getUserFromPref();
+        setState(() {
+          _user = user;
+        });
+        inspect(_user);
         showDialogBox('Login successed!', 'เข้าสู่ระบบสำเร็จ!');
       } else {
         print('Could not post data. @ login.page._login()');
@@ -59,6 +85,10 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       print('error on login.page._login() => $e');
+    } finally {
+      setState(() {
+        _isLoad = false;
+      });
     }
   }
 
@@ -102,103 +132,187 @@ class _LoginPageState extends State<LoginPage> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('เข้าสู่ระบบ Laravel8 api',
-                style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue)),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: FormBuilder(
-                key: _formKeys,
-                initialValue: {
-                  'email': '',
-                  'password': '',
-                },
-                // autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: _user != null
+            ? Container(
+                padding: EdgeInsets.all(10),
+                child: Column(children: [
+                  Text('User Info',
+                      style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue)),
+                  Row(
+                    children: [
+                      Text('Username :',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black45)),
+                      Text(' ${_user!.username ?? ''}',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.red)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Email :',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black45)),
+                      Text(' ${_user!.email ?? ''}',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.red)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Fullname :',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black45)),
+                      Text(' ${_user!.fullname ?? ''}',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.red)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Telephone :',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black45)),
+                      Text(' ${_user!.tel ?? ''}',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.red)),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text('Role : ',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black45)),
+                      Text(' ${_user!.role.toString()}',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.red)),
+                    ],
+                  ),
+                ]),
+              )
+            : Container(
                 child: Column(
-                  children: <Widget>[
-                    FormBuilderTextField(
-                      name: "email",
-                      maxLines: 1,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                          labelText: "Email",
-                          labelStyle: TextStyle(color: Colors.black87),
-                          fillColor: Colors.white,
-                          filled: true,
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
-                          errorStyle: TextStyle(color: Colors.white)),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(context),
-                        FormBuilderValidators.email(context),
-                      ]),
-                    ),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('เข้าสู่ระบบ Laravel8 api',
+                        style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue)),
                     SizedBox(height: 20),
-                    FormBuilderTextField(
-                      name: "password",
-                      maxLines: 1,
-                      obscureText: true,
-                      keyboardType: TextInputType.visiblePassword,
-                      decoration: InputDecoration(
-                          labelText: "Password",
-                          labelStyle: TextStyle(color: Colors.black87),
-                          fillColor: Colors.white,
-                          filled: true,
-                          border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10))),
-                          errorStyle: TextStyle(color: Colors.white)),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(context),
-                        FormBuilderValidators.min(context, 4),
-                      ]),
-                    ),
-                    SizedBox(height: 20),
-                    SizedBox(
-                      width: size.width * 1,
-                      height: 72,
-                      child: MaterialButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0)),
-                        color: Colors.blue,
-                        textColor: Colors.white,
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              left: 0.0,
-                              child: !isLoad
-                                  ? Container(
-                                      width: 20.0,
-                                      height: 20.0,
-                                      child: CircularProgressIndicator())
-                                  : SizedBox.shrink(),
+                    Padding(
+                      padding: EdgeInsets.all(10),
+                      child: FormBuilder(
+                        key: _formKeys,
+                        initialValue: {
+                          'email': '',
+                          'password': '',
+                        },
+                        // autovalidateMode: AutovalidateMode.onUserInteraction,
+                        child: Column(
+                          children: <Widget>[
+                            FormBuilderTextField(
+                              name: "email",
+                              maxLines: 1,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                  labelText: "Email",
+                                  labelStyle: TextStyle(color: Colors.black87),
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10))),
+                                  errorStyle: TextStyle(color: Colors.white)),
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(context),
+                                FormBuilderValidators.email(context),
+                              ]),
                             ),
-                            Center(
-                              child: Text('Log In',
-                                  style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white)),
+                            SizedBox(height: 20),
+                            FormBuilderTextField(
+                              name: "password",
+                              maxLines: 1,
+                              obscureText: true,
+                              keyboardType: TextInputType.visiblePassword,
+                              decoration: InputDecoration(
+                                  labelText: "Password",
+                                  labelStyle: TextStyle(color: Colors.black87),
+                                  fillColor: Colors.white,
+                                  filled: true,
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10))),
+                                  errorStyle: TextStyle(color: Colors.white)),
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(context),
+                                FormBuilderValidators.min(context, 4),
+                              ]),
                             ),
+                            SizedBox(height: 20),
+                            SizedBox(
+                              width: size.width * 1,
+                              height: 72,
+                              child: MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0)),
+                                color: Colors.blue,
+                                textColor: Colors.white,
+                                child: Stack(
+                                  children: [
+                                    Positioned(
+                                      left: 0.0,
+                                      child: !_isLoad
+                                          ? Container(
+                                              width: 20.0,
+                                              height: 20.0,
+                                              child:
+                                                  CircularProgressIndicator())
+                                          : SizedBox.shrink(),
+                                    ),
+                                    Center(
+                                      child: Text('Log In',
+                                          style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white)),
+                                    ),
+                                  ],
+                                ),
+                                onPressed: () => signIn(context),
+                              ),
+                            ),
+                            SizedBox(height: 20),
                           ],
                         ),
-                        onPressed: () => signIn(context),
                       ),
                     ),
-                    SizedBox(height: 20),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
