@@ -181,6 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Colors.blue)),
+                  SizedBox(height: 20),
                   Row(
                     children: [
                       Text('Username :',
@@ -251,7 +252,7 @@ class _LoginPageState extends State<LoginPage> {
                               color: Colors.red)),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 40),
                   ElevatedButton.icon(
                     icon: Icon(
                       Icons.logout,
