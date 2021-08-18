@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2laravel8/screens/register.page.dart';
 import 'login.page.dart';
-import 'logout.page.dart';
 import 'product.page.dart';
 
 class RootPage extends StatefulWidget {
@@ -21,7 +20,7 @@ class _RootPageState extends State<RootPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Center(child: Text("Flutter2 Laravel8")),
@@ -64,9 +63,6 @@ class _RootPageState extends State<RootPage> {
               Tab(
                 text: "Product",
               ),
-              Tab(
-                text: "Logout",
-              ),
             ],
           ),
         ),
@@ -75,7 +71,6 @@ class _RootPageState extends State<RootPage> {
             LoginPage(),
             RegisterPage(),
             ProductPage(),
-            LoginOut()
           ],
         ),
       ),
