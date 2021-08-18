@@ -48,6 +48,18 @@ class _LoginPageState extends State<LoginPage> {
     return null;
   }
 
+  Future<String?> getTokenFromPref() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var loginData = prefs.getString('loginData');
+    if (loginData != null && loginData.isNotEmpty) {
+      var mapData = json.decode(loginData);
+      if (mapData != null && mapData.containsKey('user')) {
+        return mapData['token'] ?? '';
+      }
+    }
+    return null;
+  }
+
   void _login(Map<String, dynamic> formData) async {
     try {
       setState(() {
@@ -93,12 +105,31 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _logout() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('loginData');
-    var user = await getUserFromPref();
-    setState(() {
-      _user = user;
-    });
+    try {
+      String url = BASE_API_URL + '/logout';
+      var token = await getTokenFromPref();
+      var headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      };
+      final response = await http.post(Uri.parse(url), headers: headers);
+      if (response.statusCode == 200) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.remove('loginData');
+        var user = await getUserFromPref();
+        setState(() {
+          _user = user;
+        });
+        showDialogBox('Logout success!', 'ออกจากระบบเรียบร้อย');
+      } else {
+        print(response.body);
+        showDialogBox('Logout failed!',
+            'ไม่สามารถออกจากระบบได้ status:${response.statusCode} \n(token อาจจะถูกลบไปแล้ว)');
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   void signIn(BuildContext context) async {
