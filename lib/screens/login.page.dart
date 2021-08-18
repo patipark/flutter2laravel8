@@ -92,6 +92,15 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  _logout() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('loginData');
+    var user = await getUserFromPref();
+    setState(() {
+      _user = user;
+    });
+  }
+
   void signIn(BuildContext context) async {
     _formKeys.currentState!.save();
     if (_formKeys.currentState!.validate()) {
@@ -210,6 +219,25 @@ class _LoginPageState extends State<LoginPage> {
                               fontWeight: FontWeight.normal,
                               color: Colors.red)),
                     ],
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    icon: Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                      size: 72.0,
+                    ),
+                    label: Text('Logout',
+                        style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
+                    onPressed: _logout,
+                    style: ElevatedButton.styleFrom(
+                      shape: new RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20.0),
+                      ),
+                    ),
                   ),
                 ]),
               )
